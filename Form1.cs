@@ -27,6 +27,7 @@ namespace TetrisGame
         private System.Windows.Forms.Timer flashTimer = new System.Windows.Forms.Timer();
 
         private bool isPaused = false;
+        private int highScore = 0;
 
         #endregion
 
@@ -42,11 +43,13 @@ namespace TetrisGame
             this.ActiveControl = null;
             this.Focus();
 
+            highScore = Properties.Settings.Default.HighScore;
+
             shapes = new List<Shape>
             {
                 new Shape(new int[,] {{1,1,1,1}}, Color.Cyan),
                 new Shape(new int[,] {{1,1},{1,1}}, Color.Yellow),
-                new Shape(new int[,] {{0,1,0},{1,1,1}}, Color.Purple),
+                new Shape(new int[,] {{0,1,0},{1,1,1}}, Color.Chocolate),
                 new Shape(new int[,] {{1,0,0},{1,1,1}}, Color.Blue),
                 new Shape(new int[,] {{0,0,1},{1,1,1}}, Color.Orange),
                 new Shape(new int[,] {{0,1,1},{1,1,0}}, Color.Green),
@@ -178,6 +181,85 @@ namespace TetrisGame
             }
         }
 
+        private void MirrorShape(Shape shape)
+        {
+            int rows = shape.Matrix.GetLength(0);
+            int cols = shape.Matrix.GetLength(1);
+            int[,] mirrored = new int[rows, cols];
+
+            for (int y = 0; y < rows; y++)
+            {
+                for (int x = 0; x < cols; x++)
+                {
+                    mirrored[y, x] = shape.Matrix[y, cols - 1 - x];
+                }
+            }
+
+            shape.Matrix = mirrored;
+        }
+
+        private void btnRestart_Click(object sender, EventArgs e)
+        {
+            grid = new int[GridHeight, GridWidth];
+            currentShape = null;
+            score = 0;
+            lblScore.Text = $"Score: {score}";
+            lblHighScore.Text = $"High Score: {highScore}";
+            isGameOver = false;
+            gameTimer.Start();
+            this.Focus();
+            Invalidate();
+        }
+
+        private void FlashTick(object sender, EventArgs e)
+        {
+            flashCounter++;
+            if (flashCounter >= 6)
+            {
+                flashTimer.Stop();
+                flashTimer.Tick -= FlashTick;
+
+                // Sort rows from top to bottom
+                flashingRows.Sort();
+
+                foreach (int y in flashingRows)
+                {
+                    DeleteRow(y);
+                }
+
+                score += flashingRows.Count * 100 + (flashingRows.Count - 1) * 50;
+
+                if (score > highScore)
+                {
+                    highScore = score;
+                    Properties.Settings.Default.HighScore = highScore;
+                    Properties.Settings.Default.Save();
+                }
+
+                flashingRows.Clear();
+            }
+
+            Invalidate();
+        }
+
+        private void DeleteRow(int rowIndex)
+        {
+            for (int y = rowIndex; y > 0; y--)
+            {
+                for (int x = 0; x < GridWidth; x++)
+                {
+                    grid[y, x] = grid[y - 1, x];
+                }
+            }
+
+            for (int x = 0; x < GridWidth; x++)
+            {
+                grid[0, x] = 0;
+            }
+        }
+
+        #region Override Methods
+
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
@@ -264,7 +346,17 @@ namespace TetrisGame
             }
 
             // Draw score
-            g.DrawString(lblScore.Text = $"Score: {score}", new Font("Arial", 16), Brushes.Black, new PointF(10, 865));
+            lblScore.Text = $"Score: {score}";
+            lblHighScore.Text = $"High Score: {highScore}";
+            g.DrawString(lblScore.Text, new Font("Arial", 11), Brushes.Black, new PointF(10, 865));
+
+            // Update high score
+            if (score > highScore)
+            {
+                highScore = score;
+                Properties.Settings.Default.HighScore = highScore;
+                Properties.Settings.Default.Save();
+            }
 
             // Draw next piece preview
             if (nextShape != null)
@@ -352,16 +444,22 @@ namespace TetrisGame
                     }
                     break;
                 case Keys.P:
+                case Keys.Space:
+                case Keys.Escape:
                     isPaused = !isPaused;
                     if (isPaused)
                     {
                         gameTimer.Stop();
-                        lblScore.Text = "Paused";
+                        lblScore.Text = $"Score: Paused";
+                        lblHighScore.Text = $"High Score: {highScore}";
+                        btnRestart.Enabled = false; // Disable restart while paused
                     }
                     else
                     {
                         gameTimer.Start();
                         lblScore.Text = $"Score: {score}";
+                        lblHighScore.Text = $"High Score: {highScore}";
+                        btnRestart.Enabled = true; // Re-enable restart
                     }
                     break;
             }
@@ -370,62 +468,6 @@ namespace TetrisGame
             return true;
         }
 
-        private void MirrorShape(Shape shape)
-        {
-            int rows = shape.Matrix.GetLength(0);
-            int cols = shape.Matrix.GetLength(1);
-            int[,] mirrored = new int[rows, cols];
-
-            for (int y = 0; y < rows; y++)
-            {
-                for (int x = 0; x < cols; x++)
-                {
-                    mirrored[y, x] = shape.Matrix[y, cols - 1 - x];
-                }
-            }
-
-            shape.Matrix = mirrored;
-        }
-
-        private void btnRestart_Click(object sender, EventArgs e)
-        {
-            grid = new int[GridHeight, GridWidth];
-            currentShape = null;
-            score = 0;
-            isGameOver = false;
-            gameTimer.Start();
-            this.Focus();
-            Invalidate();
-        }
-
-        private void FlashTick(object sender, EventArgs e)
-        {
-            flashCounter++;
-            if (flashCounter >= 6)
-            {
-                flashTimer.Stop();
-                flashTimer.Tick -= FlashTick;
-
-                foreach (int y in flashingRows)
-                {
-                    for (int row = y; row > 0; row--)
-                    {
-                        for (int col = 0; col < GridWidth; col++)
-                        {
-                            grid[row, col] = grid[row - 1, col];
-                        }
-                    }
-                    for (int col = 0; col < GridWidth; col++)
-                    {
-                        grid[0, col] = 0;
-                    }
-                }
-
-                score += flashingRows.Count * 100 + (flashingRows.Count - 1) * 50;
-                flashingRows.Clear();
-            }
-
-            Invalidate();
-        }
+        #endregion
     }
 }
