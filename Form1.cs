@@ -209,8 +209,7 @@ namespace TetrisGame
             g.DrawRectangle(Pens.Black, gridOffsetX, 0, gridWidthPixels, gridHeightPixels);
 
             // Draw score at bottom-left
-            g.DrawString($"Score: {score}", new Font("Arial", 12), Brushes.Black,
-                new PointF(10, ClientSize.Height - 40));
+            g.DrawString(lblScore.Text = $"Score: {score}", new Font("Arial", 16), Brushes.Black, new PointF(10, 865));
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
