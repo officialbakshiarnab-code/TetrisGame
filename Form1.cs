@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
 namespace TetrisGame
@@ -96,7 +97,13 @@ namespace TetrisGame
         {
             Random rand = new Random();
             int index = rand.Next(shapes.Count);
-            return new Shape(shapes[index].Matrix, shapes[index].Color);
+            Shape shape = new Shape(shapes[index].Matrix, shapes[index].Color);
+
+            // Center the shape horizontally
+            shape.X = (GridWidth - shape.Matrix.GetLength(1)) / 2;
+            shape.Y = 0;
+
+            return shape;
         }
 
         private bool IsCollision(Shape shape, int offsetX, int offsetY)
@@ -206,7 +213,18 @@ namespace TetrisGame
             }
 
             // Draw outer border around the grid
-            g.DrawRectangle(Pens.Black, gridOffsetX, 0, gridWidthPixels, gridHeightPixels);
+            using (Pen roundedBorder = new Pen(Color.Black, 1))
+            using (GraphicsPath path = new GraphicsPath())
+            {
+                int radius = 20;
+                Rectangle rect = new Rectangle(gridOffsetX, 0, gridWidthPixels, gridHeightPixels);
+                path.AddArc(rect.X, rect.Y, radius, radius, 180, 90);
+                path.AddArc(rect.Right - radius, rect.Y, radius, radius, 270, 90);
+                path.AddArc(rect.Right - radius, rect.Bottom - radius, radius, radius, 0, 90);
+                path.AddArc(rect.X, rect.Bottom - radius, radius, radius, 90, 90);
+                path.CloseFigure();
+                g.DrawPath(roundedBorder, path);
+            }
 
             // Draw score at bottom-left
             g.DrawString(lblScore.Text = $"Score: {score}", new Font("Arial", 16), Brushes.Black, new PointF(10, 865));
