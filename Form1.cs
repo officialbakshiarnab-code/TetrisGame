@@ -8,6 +8,8 @@ namespace TetrisGame
 {
     public partial class Form1 : Form
     {
+        #region Declarations
+
         const int BlockSize = 30;
         const int GridWidth = 13;
         const int GridHeight = 26;
@@ -18,6 +20,13 @@ namespace TetrisGame
         private int[,] grid = new int[GridHeight, GridWidth];
         private bool isGameOver = false;
         private int score = 0;
+        private Shape nextShape;
+
+        private List<int> flashingRows = new List<int>();
+        private int flashCounter = 0;
+        private System.Windows.Forms.Timer flashTimer = new System.Windows.Forms.Timer();
+
+        #endregion
 
         public Form1()
         {
@@ -51,15 +60,21 @@ namespace TetrisGame
         {
             if (isGameOver) return;
 
+            // Spawn shape from preview or generate first
             if (currentShape == null)
-                currentShape = GetRandomShape();
+            {
+                currentShape = nextShape ?? GetRandomShape();
+                nextShape = GetRandomShape();
+            }
 
+            // Move shape down if no collision
             if (!IsCollision(currentShape, 0, 1))
             {
                 currentShape.Y++;
             }
             else
             {
+                // Lock shape into grid
                 for (int y = 0; y < currentShape.Matrix.GetLength(0); y++)
                 {
                     for (int x = 0; x < currentShape.Matrix.GetLength(1); x++)
@@ -76,6 +91,7 @@ namespace TetrisGame
 
                 ClearLines();
 
+                // Check for game over
                 for (int x = 0; x < GridWidth; x++)
                 {
                     if (grid[0, x] == 1)
@@ -87,10 +103,12 @@ namespace TetrisGame
                     }
                 }
 
-                currentShape = GetRandomShape();
+                // Move next shape into play
+                currentShape = nextShape;
+                nextShape = GetRandomShape();
             }
 
-            Invalidate();
+            Invalidate(); // Redraw
         }
 
         private Shape GetRandomShape()
@@ -98,11 +116,8 @@ namespace TetrisGame
             Random rand = new Random();
             int index = rand.Next(shapes.Count);
             Shape shape = new Shape(shapes[index].Matrix, shapes[index].Color);
-
-            // Center the shape horizontally
             shape.X = (GridWidth - shape.Matrix.GetLength(1)) / 2;
             shape.Y = 0;
-
             return shape;
         }
 
@@ -130,6 +145,9 @@ namespace TetrisGame
 
         private void ClearLines()
         {
+            flashingRows.Clear();
+            int linesCleared = 0;
+
             for (int y = GridHeight - 1; y >= 0; y--)
             {
                 bool fullLine = true;
@@ -144,26 +162,17 @@ namespace TetrisGame
 
                 if (fullLine)
                 {
-                    // Shift all rows above down by one
-                    for (int row = y; row > 0; row--)
-                    {
-                        for (int col = 0; col < GridWidth; col++)
-                        {
-                            grid[row, col] = grid[row - 1, col];
-                        }
-                    }
-
-                    // Clear the top row
-                    for (int col = 0; col < GridWidth; col++)
-                    {
-                        grid[0, col] = 0;
-                    }
-
-                    score += 100;
-
-                    // Recheck the same row index after shifting
-                    y++;
+                    flashingRows.Add(y);
+                    linesCleared++;
                 }
+            }
+
+            if (linesCleared > 0)
+            {
+                flashCounter = 0;
+                flashTimer.Interval = 100;
+                flashTimer.Tick += FlashTick;
+                flashTimer.Start();
             }
         }
 
@@ -171,7 +180,6 @@ namespace TetrisGame
         {
             Graphics g = e.Graphics;
 
-            // Calculate horizontal offset to center the grid
             int gridOffsetX = (ClientSize.Width - GridWidth * BlockSize) / 2;
             int gridWidthPixels = GridWidth * BlockSize;
             int gridHeightPixels = GridHeight * BlockSize;
@@ -183,17 +191,45 @@ namespace TetrisGame
                 {
                     if (grid[y, x] != 0)
                     {
-                        Brush brush = Brushes.Blue; // You can customize per shape
+                        bool isFlashing = flashingRows.Contains(y) && flashCounter % 2 == 0;
+                        Brush brush = isFlashing ? Brushes.White : Brushes.Blue;
+
                         g.FillRectangle(brush,
                             gridOffsetX + x * BlockSize,
                             y * BlockSize,
-                            BlockSize,
-                            BlockSize);
+                            BlockSize, BlockSize);
                     }
                 }
             }
 
-            // Draw current falling shape
+            // Draw ghost piece
+            if (currentShape != null)
+            {
+                Shape ghost = new Shape(currentShape.Matrix, Color.FromArgb(80, currentShape.Color));
+                ghost.X = currentShape.X;
+                ghost.Y = currentShape.Y;
+
+                while (!IsCollision(ghost, 0, 1))
+                {
+                    ghost.Y++;
+                }
+
+                for (int y = 0; y < ghost.Matrix.GetLength(0); y++)
+                {
+                    for (int x = 0; x < ghost.Matrix.GetLength(1); x++)
+                    {
+                        if (ghost.Matrix[y, x] == 1)
+                        {
+                            g.FillRectangle(new SolidBrush(ghost.Color),
+                                gridOffsetX + (ghost.X + x) * BlockSize,
+                                (ghost.Y + y) * BlockSize,
+                                BlockSize, BlockSize);
+                        }
+                    }
+                }
+            }
+
+            // Draw current shape
             if (currentShape != null)
             {
                 for (int y = 0; y < currentShape.Matrix.GetLength(0); y++)
@@ -205,14 +241,13 @@ namespace TetrisGame
                             g.FillRectangle(new SolidBrush(currentShape.Color),
                                 gridOffsetX + (currentShape.X + x) * BlockSize,
                                 (currentShape.Y + y) * BlockSize,
-                                BlockSize,
-                                BlockSize);
+                                BlockSize, BlockSize);
                         }
                     }
                 }
             }
 
-            // Draw outer border around the grid
+            // Draw grid border
             using (Pen roundedBorder = new Pen(Color.Black, 1))
             using (GraphicsPath path = new GraphicsPath())
             {
@@ -226,12 +261,36 @@ namespace TetrisGame
                 g.DrawPath(roundedBorder, path);
             }
 
-            // Draw score at bottom-left
+            // Draw score
             g.DrawString(lblScore.Text = $"Score: {score}", new Font("Arial", 16), Brushes.Black, new PointF(10, 865));
+
+            // Draw next piece preview
+            if (nextShape != null)
+            {
+                int previewX = ClientSize.Width - 120;
+                int previewY = 20;
+
+                g.DrawString("Next:", new Font("Arial", 12), Brushes.Black, new PointF(previewX, previewY));
+
+                for (int y = 0; y < nextShape.Matrix.GetLength(0); y++)
+                {
+                    for (int x = 0; x < nextShape.Matrix.GetLength(1); x++)
+                    {
+                        if (nextShape.Matrix[y, x] == 1)
+                        {
+                            g.FillRectangle(new SolidBrush(nextShape.Color),
+                                previewX + x * BlockSize,
+                                previewY + 20 + y * BlockSize,
+                                BlockSize, BlockSize);
+                        }
+                    }
+                }
+            }
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
+            bool isPaused = false;
             if (isGameOver || currentShape == null) return base.ProcessCmdKey(ref msg, keyData);
 
             switch (keyData)
@@ -275,6 +334,13 @@ namespace TetrisGame
                         MirrorShape(currentShape);
                     }
                     break;
+                case Keys.P:
+                    isPaused = !isPaused;
+                    if (isPaused)
+                        gameTimer.Stop();
+                    else
+                        gameTimer.Start();
+                    break;
             }
 
             Invalidate();
@@ -306,6 +372,36 @@ namespace TetrisGame
             isGameOver = false;
             gameTimer.Start();
             this.Focus();
+            Invalidate();
+        }
+
+        private void FlashTick(object sender, EventArgs e)
+        {
+            flashCounter++;
+            if (flashCounter >= 6)
+            {
+                flashTimer.Stop();
+                flashTimer.Tick -= FlashTick;
+
+                foreach (int y in flashingRows)
+                {
+                    for (int row = y; row > 0; row--)
+                    {
+                        for (int col = 0; col < GridWidth; col++)
+                        {
+                            grid[row, col] = grid[row - 1, col];
+                        }
+                    }
+                    for (int col = 0; col < GridWidth; col++)
+                    {
+                        grid[0, col] = 0;
+                    }
+                }
+
+                score += flashingRows.Count * 100 + (flashingRows.Count - 1) * 50;
+                flashingRows.Clear();
+            }
+
             Invalidate();
         }
     }
