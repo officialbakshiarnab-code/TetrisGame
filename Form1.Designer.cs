@@ -27,7 +27,7 @@
             // 
             // btnRestart
             // 
-            btnRestart.Location = new Point(308, 12);
+            btnRestart.Location = new Point(308, 850);
             btnRestart.Name = "btnRestart";
             btnRestart.Size = new Size(80, 30);
             btnRestart.TabIndex = 0;
@@ -40,7 +40,7 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(400, 800);
+            ClientSize = new Size(400, 900);
             Controls.Add(btnRestart);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;

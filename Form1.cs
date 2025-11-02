@@ -137,6 +137,7 @@ namespace TetrisGame
 
                 if (fullLine)
                 {
+                    // Shift all rows above down by one
                     for (int row = y; row > 0; row--)
                     {
                         for (int col = 0; col < GridWidth; col++)
@@ -145,12 +146,16 @@ namespace TetrisGame
                         }
                     }
 
+                    // Clear the top row
                     for (int col = 0; col < GridWidth; col++)
                     {
                         grid[0, col] = 0;
                     }
 
                     score += 100;
+
+                    // Recheck the same row index after shifting
+                    y++;
                 }
             }
         }
@@ -161,16 +166,22 @@ namespace TetrisGame
 
             // Calculate horizontal offset to center the grid
             int gridOffsetX = (ClientSize.Width - GridWidth * BlockSize) / 2;
+            int gridWidthPixels = GridWidth * BlockSize;
+            int gridHeightPixels = GridHeight * BlockSize;
 
             // Draw placed blocks
             for (int y = 0; y < GridHeight; y++)
             {
                 for (int x = 0; x < GridWidth; x++)
                 {
-                    Brush brush = grid[y, x] == 0 ? Brushes.Transparent : Brushes.Blue;
                     if (grid[y, x] != 0)
                     {
-                        g.FillRectangle(brush, gridOffsetX + x * BlockSize, y * BlockSize, BlockSize, BlockSize);
+                        Brush brush = Brushes.Blue; // You can customize per shape
+                        g.FillRectangle(brush,
+                            gridOffsetX + x * BlockSize,
+                            y * BlockSize,
+                            BlockSize,
+                            BlockSize);
                     }
                 }
             }
@@ -185,16 +196,21 @@ namespace TetrisGame
                         if (currentShape.Matrix[y, x] == 1)
                         {
                             g.FillRectangle(new SolidBrush(currentShape.Color),
-                                            gridOffsetX + (currentShape.X + x) * BlockSize,
-                                            (currentShape.Y + y) * BlockSize,
-                                            BlockSize, BlockSize);
+                                gridOffsetX + (currentShape.X + x) * BlockSize,
+                                (currentShape.Y + y) * BlockSize,
+                                BlockSize,
+                                BlockSize);
                         }
                     }
                 }
             }
 
-            // Draw score (left-aligned)
-            g.DrawString($"Score: {score}", new Font("Arial", 16), Brushes.Black, new PointF(10, 10));
+            // Draw outer border around the grid
+            g.DrawRectangle(Pens.Black, gridOffsetX, 0, gridWidthPixels, gridHeightPixels);
+
+            // Draw score at bottom-left
+            g.DrawString($"Score: {score}", new Font("Arial", 12), Brushes.Black,
+                new PointF(10, ClientSize.Height - 40));
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
