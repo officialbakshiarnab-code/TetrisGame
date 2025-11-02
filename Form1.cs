@@ -26,6 +26,8 @@ namespace TetrisGame
         private int flashCounter = 0;
         private System.Windows.Forms.Timer flashTimer = new System.Windows.Forms.Timer();
 
+        private bool isPaused = false;
+
         #endregion
 
         public Form1()
@@ -58,7 +60,7 @@ namespace TetrisGame
 
         private void GameTick(object sender, EventArgs e)
         {
-            if (isGameOver) return;
+            if (isGameOver || isPaused) return;
 
             // Spawn shape from preview or generate first
             if (currentShape == null)
@@ -267,8 +269,8 @@ namespace TetrisGame
             // Draw next piece preview
             if (nextShape != null)
             {
-                int previewX = ClientSize.Width - 120;
-                int previewY = 20;
+                int previewX = ClientSize.Width - 130;
+                int previewY = 10;
 
                 g.DrawString("Next:", new Font("Arial", 12), Brushes.Black, new PointF(previewX, previewY));
 
@@ -286,11 +288,26 @@ namespace TetrisGame
                     }
                 }
             }
+
+            // Draw pause overlay
+            if (isPaused)
+            {
+                using (Brush overlay = new SolidBrush(Color.FromArgb(180, Color.Black)))
+                {
+                    g.FillRectangle(overlay, 0, 0, ClientSize.Width, ClientSize.Height);
+                }
+
+                string pauseText = "PAUSED";
+                Font pauseFont = new Font("Arial", 32, FontStyle.Bold);
+                SizeF textSize = g.MeasureString(pauseText, pauseFont);
+                g.DrawString(pauseText, pauseFont, Brushes.White,
+                    (ClientSize.Width - textSize.Width) / 2,
+                    (ClientSize.Height - textSize.Height) / 2);
+            }
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            bool isPaused = false;
             if (isGameOver || currentShape == null) return base.ProcessCmdKey(ref msg, keyData);
 
             switch (keyData)
@@ -337,9 +354,15 @@ namespace TetrisGame
                 case Keys.P:
                     isPaused = !isPaused;
                     if (isPaused)
+                    {
                         gameTimer.Stop();
+                        lblScore.Text = "Paused";
+                    }
                     else
+                    {
                         gameTimer.Start();
+                        lblScore.Text = $"Score: {score}";
+                    }
                     break;
             }
 
