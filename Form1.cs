@@ -15,19 +15,21 @@ namespace TetrisGame
         const int GridHeight = 26;
 
         private System.Windows.Forms.Timer gameTimer = new System.Windows.Forms.Timer();
-        private Shape currentShape;
-        private List<Shape> shapes;
-        private int[,] grid = new int[GridHeight, GridWidth];
-        private bool isGameOver = false;
-        private int score = 0;
-        private Shape nextShape;
-
-        private List<int> flashingRows = new List<int>();
-        private int flashCounter = 0;
         private System.Windows.Forms.Timer flashTimer = new System.Windows.Forms.Timer();
 
         private bool isPaused = false;
+        private int score = 0;
         private int highScore = 0;
+        private bool isGameOver = false;
+        private bool showGhostPiece = false;
+
+        private List<Shape> shapes;
+        private Shape currentShape;
+        private Shape nextShape;
+        private int[,] grid = new int[GridHeight, GridWidth];
+
+        private List<int> flashingRows = new List<int>();
+        private int flashCounter = 0;
 
         #endregion
 
@@ -258,6 +260,51 @@ namespace TetrisGame
             }
         }
 
+        private void IconSettings_Click(object sender, EventArgs e)
+        {
+            settingsPanel.Visible = !settingsPanel.Visible;
+        }
+
+        private void ChkGhostPiece_Checked(object sender, EventArgs e)
+        {
+            showGhostPiece = chkGhostPiece.Checked;
+            Invalidate();
+        }
+
+        private void IconPause_Click(object sender, EventArgs e)
+        {
+            if (!isPaused)
+            {
+                isPaused = true;
+                gameTimer.Stop();
+                lblScore.Text = $"Score: Paused";
+                lblHighScore.Text = $"High Score: {highScore}";
+                btnRestart.Enabled = false;
+
+                iconPause.Visible = false;
+                iconResume.Visible = true;
+
+                Invalidate();
+            }
+        }
+
+        private void IconResume_Click(object sender, EventArgs e)
+        {
+            if (isPaused)
+            {
+                isPaused = false;
+                gameTimer.Start();
+                lblScore.Text = $"Score: {score}";
+                lblHighScore.Text = $"High Score: {highScore}";
+                btnRestart.Enabled = true;
+
+                iconPause.Visible = true;
+                iconResume.Visible = false;
+
+                Invalidate();
+            }
+        }
+
         #region Override Methods
 
         protected override void OnPaint(PaintEventArgs e)
@@ -269,7 +316,7 @@ namespace TetrisGame
             int gridHeightPixels = GridHeight * BlockSize;
 
             // NEW: Offset grid vertically to reduce gap with bottom panel
-            int gridOffsetY = (ClientSize.Height - bottomPanel.Height - gridHeightPixels) / 2;
+            int gridOffsetY = (ClientSize.Height - topPanel.Height - bottomPanel.Height - gridHeightPixels) / 2 + topPanel.Height;
 
             // Draw placed blocks
             for (int y = 0; y < GridHeight; y++)
@@ -290,7 +337,7 @@ namespace TetrisGame
             }
 
             // Draw ghost piece
-            if (currentShape != null)
+            if (currentShape != null && showGhostPiece)
             {
                 Shape ghost = new Shape(currentShape.Matrix, Color.FromArgb(80, currentShape.Color));
                 ghost.X = currentShape.X;
@@ -357,7 +404,7 @@ namespace TetrisGame
             {
                 // Position inside grid: slightly left and lower
                 int previewX = gridOffsetX + GridWidth * BlockSize - (nextShape.Matrix.GetLength(1) * BlockSize) - 10;
-                int previewY = 50;
+                int previewY = 90;
 
                 // Draw label
                 g.DrawString("Next:", new Font("Arial", 12), Brushes.Black, new PointF(previewX - 60, previewY + 10));
@@ -450,6 +497,8 @@ namespace TetrisGame
                         lblScore.Text = $"Score: Paused";
                         lblHighScore.Text = $"High Score: {highScore}";
                         btnRestart.Enabled = false; // Disable restart while paused
+                        iconPause.Visible = false;
+                        iconResume.Visible = true;
                     }
                     else
                     {
@@ -457,6 +506,8 @@ namespace TetrisGame
                         lblScore.Text = $"Score: {score}";
                         lblHighScore.Text = $"High Score: {highScore}";
                         btnRestart.Enabled = true; // Re-enable restart
+                        iconPause.Visible = true;
+                        iconResume.Visible = false;
                     }
                     break;
             }
