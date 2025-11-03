@@ -8,13 +8,12 @@
         private System.Windows.Forms.Panel bottomPanel;
         private System.Windows.Forms.Label lblScore;
         private System.Windows.Forms.Label lblHighScore;
-
         private System.Windows.Forms.Panel topPanel;
         private System.Windows.Forms.PictureBox iconRestart;
         private System.Windows.Forms.PictureBox iconPause;
         private System.Windows.Forms.PictureBox iconResume;
         private System.Windows.Forms.PictureBox iconSettings;
-        private System.Windows.Forms.Panel settingsPanel;
+        private System.Windows.Forms.FlowLayoutPanel settingsPanel;
         private System.Windows.Forms.CheckBox chkGhostPiece;
         private System.Windows.Forms.CheckBox chkMirrorEffect;
 
@@ -46,24 +45,12 @@
             iconPause = new PictureBox();
             iconResume = new PictureBox();
             iconSettings = new PictureBox();
-            settingsPanel = new Panel();
+            settingsPanel = new FlowLayoutPanel();
             chkGhostPiece = new CheckBox();
             chkMirrorEffect = new CheckBox();
 
             bottomPanel.SuspendLayout();
             SuspendLayout();
-
-            // topPanel
-            topPanel.Name = "topPanel";
-            topPanel.Dock = DockStyle.Top;
-            topPanel.Size = new Size(400, 60);
-            topPanel.BackColor = Color.LightGray;
-            topPanel.BorderStyle = BorderStyle.FixedSingle;
-            topPanel.Controls.Add(iconRestart);
-            topPanel.Controls.Add(iconPause);
-            topPanel.Controls.Add(iconResume);
-            topPanel.Controls.Add(iconSettings);
-            topPanel.Controls.Add(settingsPanel);
 
             // iconPause
             iconPause.Name = "iconPause";
@@ -98,30 +85,50 @@
             iconSettings.Image = Image.FromFile("C://Users//offic//source//repos//Projects//Games//TetrisGame//ExternalResources//images/settings.png");
             iconSettings.Click += IconSettings_Click;
 
+            // chkGhostPiece
+            chkGhostPiece.Text = "Ghost: OFF";
+            chkGhostPiece.Appearance = Appearance.Button;
+            chkGhostPiece.FlatStyle = FlatStyle.Flat;
+            chkGhostPiece.Size = new Size(100, 30);
+            chkGhostPiece.Checked = false;
+            chkGhostPiece.Location = new Point(0, 0);
+            chkGhostPiece.ForeColor = Color.Red;
+            chkGhostPiece.CheckedChanged += ChkGhostPiece_Checked;
+
+            // chkMirrorEffect
+            chkMirrorEffect.Text = "Mirror: OFF";
+            chkMirrorEffect.Appearance = Appearance.Button;
+            chkMirrorEffect.FlatStyle = FlatStyle.Flat;
+            chkMirrorEffect.Size = new Size(100, 30);
+            chkMirrorEffect.Checked = false;
+            chkMirrorEffect.Location = new Point(0, 0);
+            chkMirrorEffect.ForeColor = Color.Red;
+            chkMirrorEffect.CheckedChanged += ChkMirrorEffect_Checked;
+
             // settingsPanel
-            settingsPanel.Size = new Size(220, 40);
+            settingsPanel = new FlowLayoutPanel();
+            settingsPanel.Size = new Size(215, 40);
             settingsPanel.Location = new Point(145, 10);
             settingsPanel.BackColor = Color.WhiteSmoke;
             settingsPanel.Visible = false;
             settingsPanel.BorderStyle = BorderStyle.FixedSingle;
-
-            // chkGhostPiece
-            chkGhostPiece.Text = "Ghost Panel";
-            chkGhostPiece.Size = new Size(100, 20);
-            chkGhostPiece.Location = new Point(10, 10);
-            chkGhostPiece.Checked = false;
-            chkGhostPiece.CheckedChanged += ChkGhostPiece_Checked;
-
-            // chkMirrorEffect
-            chkMirrorEffect.Text = "Mirror Effect";
-            chkMirrorEffect.Size = new Size(100, 20);
-            chkMirrorEffect.Location = new Point(110, 10);
-            chkMirrorEffect.Checked = false;
-            chkMirrorEffect.CheckedChanged += ChkMirrorEffect_Checked;
-
+            settingsPanel.FlowDirection = FlowDirection.LeftToRight;
+            settingsPanel.WrapContents = false;
             // Add to panel
             settingsPanel.Controls.Add(chkGhostPiece);
             settingsPanel.Controls.Add(chkMirrorEffect);
+
+            // topPanel
+            topPanel.Name = "topPanel";
+            topPanel.Dock = DockStyle.Top;
+            topPanel.Size = new Size(400, 60);
+            topPanel.BackColor = Color.LightGray;
+            topPanel.BorderStyle = BorderStyle.FixedSingle;
+            topPanel.Controls.Add(iconRestart);
+            topPanel.Controls.Add(iconPause);
+            topPanel.Controls.Add(iconResume);
+            topPanel.Controls.Add(iconSettings);
+            topPanel.Controls.Add(settingsPanel);
 
             // ToolTips
             ToolTip tip = new ToolTip();
@@ -129,16 +136,6 @@
             tip.SetToolTip(iconPause, "Pause");
             tip.SetToolTip(iconResume, "Resume");
             tip.SetToolTip(iconSettings, "Settings");
-
-            // bottomPanel
-            bottomPanel.Name = "bottomPanel";
-            bottomPanel.Dock = DockStyle.Bottom;
-            bottomPanel.Size = new Size(400, 60);
-            bottomPanel.TabIndex = 0;
-            bottomPanel.BorderStyle = BorderStyle.FixedSingle;
-            bottomPanel.BackColor = Color.LightGray;
-            bottomPanel.Controls.Add(lblScore);
-            bottomPanel.Controls.Add(lblHighScore);
 
             // lblScore
             lblScore.Name = "lblScore";
@@ -157,6 +154,16 @@
             lblHighScore.Text = "High Score: 0";
             lblHighScore.Font = new Font("Arial", 12, FontStyle.Bold);
             lblHighScore.ForeColor = Color.Black;
+
+            // bottomPanel
+            bottomPanel.Name = "bottomPanel";
+            bottomPanel.Dock = DockStyle.Bottom;
+            bottomPanel.Size = new Size(400, 60);
+            bottomPanel.TabIndex = 0;
+            bottomPanel.BorderStyle = BorderStyle.FixedSingle;
+            bottomPanel.BackColor = Color.LightGray;
+            bottomPanel.Controls.Add(lblScore);
+            bottomPanel.Controls.Add(lblHighScore);
 
             // Form1
             AutoScaleDimensions = new SizeF(8F, 20F);

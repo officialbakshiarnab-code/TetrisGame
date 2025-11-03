@@ -16,21 +16,24 @@ namespace TetrisGame
 
         private System.Windows.Forms.Timer gameTimer = new System.Windows.Forms.Timer();
         private System.Windows.Forms.Timer flashTimer = new System.Windows.Forms.Timer();
+        private System.Windows.Forms.Timer settingsAnimationTimer = new System.Windows.Forms.Timer();
 
-        private bool isPaused = false;
         private int score = 0;
         private int highScore = 0;
+        private int flashCounter = 0;
+        private int settingsTargetHeight = 40;
         private bool isGameOver = false;
+        private bool isPaused = false;
         private bool showGhostPiece = false;
         private bool mirrorEffectEnabled = false;
+        private bool isSettingsExpanding = false;
+        private bool isSettingsPanelOpen = false;
+        private List<int> flashingRows = new List<int>();
 
         private List<Shape> shapes;
         private Shape currentShape;
         private Shape nextShape;
         private int[,] grid = new int[GridHeight, GridWidth];
-
-        private List<int> flashingRows = new List<int>();
-        private int flashCounter = 0;
 
         #endregion
 
@@ -59,10 +62,15 @@ namespace TetrisGame
                 new Shape(new int[,] {{1,1,0},{0,1,1}}, Color.Red)
             };
 
+            settingsAnimationTimer.Interval = 15;
+            settingsAnimationTimer.Tick += AnimateSettingsPanel;
+
             gameTimer.Interval = 500;
             gameTimer.Tick += GameTick;
             gameTimer.Start();
         }
+
+        #region Tick Handlers
 
         private void GameTick(object sender, EventArgs e)
         {
@@ -118,6 +126,137 @@ namespace TetrisGame
 
             Invalidate(); // Redraw
         }
+
+        private void FlashTick(object sender, EventArgs e)
+        {
+            flashCounter++;
+            if (flashCounter >= 6)
+            {
+                flashTimer.Stop();
+                flashTimer.Tick -= FlashTick;
+
+                // Sort rows from top to bottom
+                flashingRows.Sort();
+
+                foreach (int y in flashingRows)
+                {
+                    DeleteRow(y);
+                }
+
+                score += flashingRows.Count * 100 + (flashingRows.Count - 1) * 50;
+
+                if (score > highScore)
+                {
+                    highScore = score;
+                    Properties.Settings.Default.HighScore = highScore;
+                    Properties.Settings.Default.Save();
+                }
+
+                flashingRows.Clear();
+            }
+
+            Invalidate();
+        }
+
+        #endregion
+
+        #region Icon Click Handlers
+
+        private void IconSettings_Click(object sender, EventArgs e)
+        {
+            if (!isSettingsPanelOpen)
+            {
+                settingsPanel.Height = 0;
+                settingsPanel.Visible = true;
+                isSettingsExpanding = true;
+                settingsAnimationTimer.Start();
+            }
+            else
+            {
+                isSettingsExpanding = false;
+                settingsAnimationTimer.Start();
+            }
+
+            isSettingsPanelOpen = !isSettingsPanelOpen;
+        }
+
+        private void IconPause_Click(object sender, EventArgs e)
+        {
+            if (!isPaused)
+            {
+                isPaused = true;
+                gameTimer.Stop();
+                lblScore.Text = $"Score: Paused";
+                lblHighScore.Text = $"High Score: {highScore}";
+
+                iconPause.Visible = false;
+                iconResume.Visible = true;
+
+                Invalidate();
+            }
+        }
+
+        private void IconResume_Click(object sender, EventArgs e)
+        {
+            if (isPaused)
+            {
+                isPaused = false;
+                gameTimer.Start();
+                lblScore.Text = $"Score: {score}";
+                lblHighScore.Text = $"High Score: {highScore}";
+
+                iconPause.Visible = true;
+                iconResume.Visible = false;
+
+                Invalidate();
+            }
+        }
+
+        private void IconRestart_Click(object sender, EventArgs e)
+        {
+            grid = new int[GridHeight, GridWidth];
+            currentShape = null;
+            score = 0;
+            lblScore.Text = $"Score: {score}";
+            lblHighScore.Text = $"High Score: {highScore}";
+            isGameOver = false;
+
+            // NEW: Clear pause state
+            if (isPaused)
+            {
+                isPaused = false;
+                iconPause.Visible = true;
+                iconResume.Visible = false;
+            }
+
+            gameTimer.Start();
+            this.Focus();
+            Invalidate();
+        }
+
+        #endregion
+
+        #region Checkbox Handlers
+
+        private void ChkGhostPiece_Checked(object sender, EventArgs e)
+        {
+            showGhostPiece = chkGhostPiece.Checked;
+            chkGhostPiece.Text = showGhostPiece ? "Ghost: ON" : "Ghost: OFF";
+            chkGhostPiece.ForeColor = showGhostPiece ? Color.Green : Color.Red;
+            Invalidate();
+        }
+
+        private void ChkMirrorEffect_Checked(object sender, EventArgs e)
+        {
+            mirrorEffectEnabled = chkMirrorEffect.Checked;
+            chkMirrorEffect.Text = mirrorEffectEnabled ? "Mirror: ON" : "Mirror: OFF";
+            chkMirrorEffect.ForeColor = mirrorEffectEnabled ? Color.Green : Color.Red;
+            Invalidate();
+        }
+
+        #endregion
+
+        #region Functioanlity Helpers
 
         private Shape GetRandomShape()
         {
@@ -201,59 +340,6 @@ namespace TetrisGame
             shape.Matrix = mirrored;
         }
 
-        private void btnRestart_Click(object sender, EventArgs e)
-        {
-            grid = new int[GridHeight, GridWidth];
-            currentShape = null;
-            score = 0;
-            lblScore.Text = $"Score: {score}";
-            lblHighScore.Text = $"High Score: {highScore}";
-            isGameOver = false;
-
-            // NEW: Clear pause state
-            if (isPaused)
-            {
-                isPaused = false;
-                iconPause.Visible = true;
-                iconResume.Visible = false;
-            }
-
-            gameTimer.Start();
-            this.Focus();
-            Invalidate();
-        }
-
-        private void FlashTick(object sender, EventArgs e)
-        {
-            flashCounter++;
-            if (flashCounter >= 6)
-            {
-                flashTimer.Stop();
-                flashTimer.Tick -= FlashTick;
-
-                // Sort rows from top to bottom
-                flashingRows.Sort();
-
-                foreach (int y in flashingRows)
-                {
-                    DeleteRow(y);
-                }
-
-                score += flashingRows.Count * 100 + (flashingRows.Count - 1) * 50;
-
-                if (score > highScore)
-                {
-                    highScore = score;
-                    Properties.Settings.Default.HighScore = highScore;
-                    Properties.Settings.Default.Save();
-                }
-
-                flashingRows.Clear();
-            }
-
-            Invalidate();
-        }
-
         private void DeleteRow(int rowIndex)
         {
             for (int y = rowIndex; y > 0; y--)
@@ -270,58 +356,32 @@ namespace TetrisGame
             }
         }
 
-        private void IconSettings_Click(object sender, EventArgs e)
+        private void AnimateSettingsPanel(object sender, EventArgs e)
         {
-            settingsPanel.Visible = !settingsPanel.Visible;
-        }
+            int step = 5;
 
-        private void ChkGhostPiece_Checked(object sender, EventArgs e)
-        {
-            showGhostPiece = chkGhostPiece.Checked;
-            Invalidate();
-        }
-
-        private void IconPause_Click(object sender, EventArgs e)
-        {
-            if (!isPaused)
+            if (isSettingsExpanding)
             {
-                isPaused = true;
-                gameTimer.Stop();
-                lblScore.Text = $"Score: Paused";
-                lblHighScore.Text = $"High Score: {highScore}";
-
-                iconPause.Visible = false;
-                iconResume.Visible = true;
-
-                Invalidate();
+                settingsPanel.Height += step;
+                if (settingsPanel.Height >= settingsTargetHeight)
+                {
+                    settingsPanel.Height = settingsTargetHeight;
+                    settingsAnimationTimer.Stop();
+                }
+            }
+            else
+            {
+                settingsPanel.Height -= step;
+                if (settingsPanel.Height <= 0)
+                {
+                    settingsPanel.Height = 0;
+                    settingsPanel.Visible = false;
+                    settingsAnimationTimer.Stop();
+                }
             }
         }
 
-        private void IconResume_Click(object sender, EventArgs e)
-        {
-            if (isPaused)
-            {
-                isPaused = false;
-                gameTimer.Start();
-                lblScore.Text = $"Score: {score}";
-                lblHighScore.Text = $"High Score: {highScore}";
-
-                iconPause.Visible = true;
-                iconResume.Visible = false;
-
-                Invalidate();
-            }
-        }
-
-        private void IconRestart_Click(object sender, EventArgs e)
-        {
-            btnRestart_Click(sender, e); // reuse existing restart logic
-        }
-
-        private void ChkMirrorEffect_Checked(object sender, EventArgs e)
-        {
-            mirrorEffectEnabled = chkMirrorEffect.Checked;
-        }
+        #endregion
 
         #region Override Methods
 
