@@ -22,6 +22,7 @@ namespace TetrisGame
         private int highScore = 0;
         private bool isGameOver = false;
         private bool showGhostPiece = false;
+        private bool mirrorEffectEnabled = false;
 
         private List<Shape> shapes;
         private Shape currentShape;
@@ -310,6 +311,11 @@ namespace TetrisGame
             btnRestart_Click(sender, e); // reuse existing restart logic
         }
 
+        private void ChkMirrorEffect_Checked(object sender, EventArgs e)
+        {
+            mirrorEffectEnabled = chkMirrorEffect.Checked;
+        }
+
         #region Override Methods
 
         protected override void OnPaint(PaintEventArgs e)
@@ -485,11 +491,14 @@ namespace TetrisGame
                     }
                     break;
                 case Keys.Tab:
-                    MirrorShape(currentShape);
-                    if (IsCollision(currentShape, 0, 0))
+                    if (mirrorEffectEnabled)
                     {
-                        // Undo mirror if it causes collision
                         MirrorShape(currentShape);
+                        if (IsCollision(currentShape, 0, 0))
+                        {
+                            // Undo mirror if it causes collision
+                            MirrorShape(currentShape);
+                        }
                     }
                     break;
                 case Keys.P:

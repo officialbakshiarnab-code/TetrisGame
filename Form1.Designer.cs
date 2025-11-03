@@ -17,6 +17,7 @@
         private System.Windows.Forms.PictureBox iconSettings;
         private System.Windows.Forms.Panel settingsPanel;
         private System.Windows.Forms.CheckBox chkGhostPiece;
+        private System.Windows.Forms.CheckBox chkMirrorEffect;
 
         #endregion
 
@@ -49,6 +50,7 @@
             iconSettings = new PictureBox();
             settingsPanel = new Panel();
             chkGhostPiece = new CheckBox();
+            chkMirrorEffect = new CheckBox();
 
             bottomPanel.SuspendLayout();
             SuspendLayout();
@@ -110,6 +112,14 @@
             chkGhostPiece.Location = new Point(10, 10);
             chkGhostPiece.Checked = false;
             chkGhostPiece.CheckedChanged += ChkGhostPiece_Checked;
+
+            // chkMirrorEffect
+            chkMirrorEffect.Text = "Mirror Effect";
+            chkMirrorEffect.Location = new Point(10, 25); // Slightly below ghost checkbox
+            chkMirrorEffect.Checked = false;
+            chkMirrorEffect.CheckedChanged += ChkMirrorEffect_Checked;
+
+            settingsPanel.Controls.Add(chkMirrorEffect);
 
             // ToolTips
             ToolTip tip = new ToolTip();
