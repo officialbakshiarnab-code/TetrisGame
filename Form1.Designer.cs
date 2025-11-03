@@ -6,7 +6,6 @@
 
         private System.ComponentModel.IContainer components = null;
         private System.Windows.Forms.Panel bottomPanel;
-        private System.Windows.Forms.Button btnRestart;
         private System.Windows.Forms.Label lblScore;
         private System.Windows.Forms.Label lblHighScore;
 
@@ -40,7 +39,6 @@
         {
             components = new System.ComponentModel.Container();
             bottomPanel = new Panel();
-            btnRestart = new Button();
             lblScore = new Label();
             lblHighScore = new Label();
             topPanel = new Panel();
@@ -101,24 +99,28 @@
             iconSettings.Click += IconSettings_Click;
 
             // settingsPanel
-            settingsPanel.Size = new Size(120, 40);
-            settingsPanel.Location = new Point(180, 10);
+            settingsPanel.Size = new Size(220, 40);
+            settingsPanel.Location = new Point(145, 10);
             settingsPanel.BackColor = Color.WhiteSmoke;
             settingsPanel.Visible = false;
-            settingsPanel.Controls.Add(chkGhostPiece);
+            settingsPanel.BorderStyle = BorderStyle.FixedSingle;
 
             // chkGhostPiece
-            chkGhostPiece.Text = "Ghost";
+            chkGhostPiece.Text = "Ghost Panel";
+            chkGhostPiece.Size = new Size(100, 20);
             chkGhostPiece.Location = new Point(10, 10);
             chkGhostPiece.Checked = false;
             chkGhostPiece.CheckedChanged += ChkGhostPiece_Checked;
 
             // chkMirrorEffect
             chkMirrorEffect.Text = "Mirror Effect";
-            chkMirrorEffect.Location = new Point(10, 25); // Slightly below ghost checkbox
+            chkMirrorEffect.Size = new Size(100, 20);
+            chkMirrorEffect.Location = new Point(110, 10);
             chkMirrorEffect.Checked = false;
             chkMirrorEffect.CheckedChanged += ChkMirrorEffect_Checked;
 
+            // Add to panel
+            settingsPanel.Controls.Add(chkGhostPiece);
             settingsPanel.Controls.Add(chkMirrorEffect);
 
             // ToolTips
@@ -137,7 +139,6 @@
             bottomPanel.BackColor = Color.LightGray;
             bottomPanel.Controls.Add(lblScore);
             bottomPanel.Controls.Add(lblHighScore);
-            bottomPanel.Controls.Add(btnRestart);
 
             // lblScore
             lblScore.Name = "lblScore";
@@ -156,17 +157,6 @@
             lblHighScore.Text = "High Score: 0";
             lblHighScore.Font = new Font("Arial", 12, FontStyle.Bold);
             lblHighScore.ForeColor = Color.Black;
-
-            // btnRestart
-            btnRestart.Name = "btnRestart";
-            btnRestart.Size = new Size(80, 30);
-            btnRestart.TabIndex = 3;
-            btnRestart.TabStop = false;
-            btnRestart.Text = "Restart";
-            btnRestart.UseVisualStyleBackColor = true;
-            btnRestart.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnRestart.Location = new Point(bottomPanel.Width - btnRestart.Width - 10, bottomPanel.Height - btnRestart.Height - 10);
-            btnRestart.Click += btnRestart_Click;
 
             // Form1
             AutoScaleDimensions = new SizeF(8F, 20F);

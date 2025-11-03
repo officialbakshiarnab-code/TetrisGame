@@ -209,6 +209,15 @@ namespace TetrisGame
             lblScore.Text = $"Score: {score}";
             lblHighScore.Text = $"High Score: {highScore}";
             isGameOver = false;
+
+            // NEW: Clear pause state
+            if (isPaused)
+            {
+                isPaused = false;
+                iconPause.Visible = true;
+                iconResume.Visible = false;
+            }
+
             gameTimer.Start();
             this.Focus();
             Invalidate();
@@ -280,7 +289,6 @@ namespace TetrisGame
                 gameTimer.Stop();
                 lblScore.Text = $"Score: Paused";
                 lblHighScore.Text = $"High Score: {highScore}";
-                btnRestart.Enabled = false;
 
                 iconPause.Visible = false;
                 iconResume.Visible = true;
@@ -297,7 +305,6 @@ namespace TetrisGame
                 gameTimer.Start();
                 lblScore.Text = $"Score: {score}";
                 lblHighScore.Text = $"High Score: {highScore}";
-                btnRestart.Enabled = true;
 
                 iconPause.Visible = true;
                 iconResume.Visible = false;
@@ -510,7 +517,6 @@ namespace TetrisGame
                         gameTimer.Stop();
                         lblScore.Text = $"Score: Paused";
                         lblHighScore.Text = $"High Score: {highScore}";
-                        btnRestart.Enabled = false; // Disable restart while paused
                         iconPause.Visible = false;
                         iconResume.Visible = true;
                     }
@@ -519,7 +525,6 @@ namespace TetrisGame
                         gameTimer.Start();
                         lblScore.Text = $"Score: {score}";
                         lblHighScore.Text = $"High Score: {highScore}";
-                        btnRestart.Enabled = true; // Re-enable restart
                         iconPause.Visible = true;
                         iconResume.Visible = false;
                     }
