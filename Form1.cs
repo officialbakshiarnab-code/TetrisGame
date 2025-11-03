@@ -268,6 +268,9 @@ namespace TetrisGame
             int gridWidthPixels = GridWidth * BlockSize;
             int gridHeightPixels = GridHeight * BlockSize;
 
+            // NEW: Offset grid vertically to reduce gap with bottom panel
+            int gridOffsetY = (ClientSize.Height - bottomPanel.Height - gridHeightPixels) / 2;
+
             // Draw placed blocks
             for (int y = 0; y < GridHeight; y++)
             {
@@ -280,7 +283,7 @@ namespace TetrisGame
 
                         g.FillRectangle(brush,
                             gridOffsetX + x * BlockSize,
-                            y * BlockSize,
+                            gridOffsetY + y * BlockSize,
                             BlockSize, BlockSize);
                     }
                 }
@@ -306,7 +309,7 @@ namespace TetrisGame
                         {
                             g.FillRectangle(new SolidBrush(ghost.Color),
                                 gridOffsetX + (ghost.X + x) * BlockSize,
-                                (ghost.Y + y) * BlockSize,
+                                gridOffsetY + (ghost.Y + y) * BlockSize,
                                 BlockSize, BlockSize);
                         }
                     }
@@ -324,7 +327,7 @@ namespace TetrisGame
                         {
                             g.FillRectangle(new SolidBrush(currentShape.Color),
                                 gridOffsetX + (currentShape.X + x) * BlockSize,
-                                (currentShape.Y + y) * BlockSize,
+                                gridOffsetY + (currentShape.Y + y) * BlockSize,
                                 BlockSize, BlockSize);
                         }
                     }
@@ -336,7 +339,7 @@ namespace TetrisGame
             using (GraphicsPath path = new GraphicsPath())
             {
                 int radius = 20;
-                Rectangle rect = new Rectangle(gridOffsetX, 0, gridWidthPixels, gridHeightPixels);
+                Rectangle rect = new Rectangle(gridOffsetX, gridOffsetY, gridWidthPixels, gridHeightPixels);
                 path.AddArc(rect.X, rect.Y, radius, radius, 180, 90);
                 path.AddArc(rect.Right - radius, rect.Y, radius, radius, 270, 90);
                 path.AddArc(rect.Right - radius, rect.Bottom - radius, radius, radius, 0, 90);
@@ -345,27 +348,21 @@ namespace TetrisGame
                 g.DrawPath(roundedBorder, path);
             }
 
-            // Draw score
+            // Draw score labels
             lblScore.Text = $"Score: {score}";
             lblHighScore.Text = $"High Score: {highScore}";
-            g.DrawString(lblScore.Text, new Font("Arial", 11), Brushes.Black, new PointF(10, 865));
-
-            // Update high score
-            if (score > highScore)
-            {
-                highScore = score;
-                Properties.Settings.Default.HighScore = highScore;
-                Properties.Settings.Default.Save();
-            }
 
             // Draw next piece preview
             if (nextShape != null)
             {
-                int previewX = ClientSize.Width - 130;
-                int previewY = 10;
+                // Position inside grid: slightly left and lower
+                int previewX = gridOffsetX + GridWidth * BlockSize - (nextShape.Matrix.GetLength(1) * BlockSize) - 10;
+                int previewY = 50;
 
-                g.DrawString("Next:", new Font("Arial", 12), Brushes.Black, new PointF(previewX, previewY));
+                // Draw label
+                g.DrawString("Next:", new Font("Arial", 12), Brushes.Black, new PointF(previewX - 60, previewY + 10));
 
+                // Draw shape
                 for (int y = 0; y < nextShape.Matrix.GetLength(0); y++)
                 {
                     for (int x = 0; x < nextShape.Matrix.GetLength(1); x++)
@@ -374,19 +371,19 @@ namespace TetrisGame
                         {
                             g.FillRectangle(new SolidBrush(nextShape.Color),
                                 previewX + x * BlockSize,
-                                previewY + 20 + y * BlockSize,
+                                previewY + y * BlockSize,
                                 BlockSize, BlockSize);
                         }
                     }
                 }
             }
 
-            // Draw pause overlay
+            // Updated pause overlay: only covers grid
             if (isPaused)
             {
                 using (Brush overlay = new SolidBrush(Color.FromArgb(180, Color.Black)))
                 {
-                    g.FillRectangle(overlay, 0, 0, ClientSize.Width, ClientSize.Height);
+                    g.FillRectangle(overlay, gridOffsetX, gridOffsetY, gridWidthPixels, gridHeightPixels);
                 }
 
                 string pauseText = "PAUSED";
@@ -394,7 +391,7 @@ namespace TetrisGame
                 SizeF textSize = g.MeasureString(pauseText, pauseFont);
                 g.DrawString(pauseText, pauseFont, Brushes.White,
                     (ClientSize.Width - textSize.Width) / 2,
-                    (ClientSize.Height - textSize.Height) / 2);
+                    gridOffsetY + (gridHeightPixels - textSize.Height) / 2);
             }
         }
 
