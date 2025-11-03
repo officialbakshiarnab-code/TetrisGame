@@ -65,11 +65,6 @@
             topPanel.Controls.Add(iconSettings);
             topPanel.Controls.Add(settingsPanel);
 
-            // iconRestart
-            iconRestart.Size = new Size(32, 32);
-            iconRestart.Location = new Point(10, 14);
-            iconRestart.SizeMode = PictureBoxSizeMode.Zoom;
-
             // iconPause
             iconPause.Name = "iconPause";
             iconPause.Size = new Size(32, 32);
@@ -81,16 +76,26 @@
             // iconResume
             iconResume.Name = "iconResume";
             iconResume.Size = new Size(32, 32);
-            iconResume.Location = new Point(52, 14); // same spot as pause
+            iconResume.Location = new Point(52, 14); 
             iconResume.SizeMode = PictureBoxSizeMode.Zoom;
             iconResume.Image = Image.FromFile("C://Users//offic//source//repos//Projects//Games//TetrisGame//ExternalResources//images/resume.png");
             iconResume.Click += IconResume_Click;
-            iconResume.Visible = false; // hidden at start
+            iconResume.Visible = false;
+
+            // iconRestart
+            iconRestart.Name = "iconRestart";
+            iconRestart.Size = new Size(32, 32);
+            iconRestart.Location = new Point(10, 14);
+            iconRestart.SizeMode = PictureBoxSizeMode.Zoom;
+            iconRestart.Image = Image.FromFile("C://Users//offic//source//repos//Projects//Games//TetrisGame//ExternalResources//images/restart.png");
+            iconRestart.Click += IconRestart_Click;
 
             // iconSettings
+            iconSettings.Name = "iconSettings";
             iconSettings.Size = new Size(32, 32);
-            iconSettings.Location = new Point(136, 14);
+            iconSettings.Location = new Point(94, 14);
             iconSettings.SizeMode = PictureBoxSizeMode.Zoom;
+            iconSettings.Image = Image.FromFile("C://Users//offic//source//repos//Projects//Games//TetrisGame//ExternalResources//images/settings.png");
             iconSettings.Click += IconSettings_Click;
 
             // settingsPanel
@@ -101,10 +106,17 @@
             settingsPanel.Controls.Add(chkGhostPiece);
 
             // chkGhostPiece
-            chkGhostPiece.Text = "Show Ghost";
+            chkGhostPiece.Text = "Ghost";
             chkGhostPiece.Location = new Point(10, 10);
-            chkGhostPiece.Checked = true;
+            chkGhostPiece.Checked = false;
             chkGhostPiece.CheckedChanged += ChkGhostPiece_Checked;
+
+            // ToolTips
+            ToolTip tip = new ToolTip();
+            tip.SetToolTip(iconRestart, "Restart");
+            tip.SetToolTip(iconPause, "Pause");
+            tip.SetToolTip(iconResume, "Resume");
+            tip.SetToolTip(iconSettings, "Settings");
 
             // bottomPanel
             bottomPanel.Name = "bottomPanel";

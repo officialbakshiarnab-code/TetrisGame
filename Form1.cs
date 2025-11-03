@@ -305,6 +305,11 @@ namespace TetrisGame
             }
         }
 
+        private void IconRestart_Click(object sender, EventArgs e)
+        {
+            btnRestart_Click(sender, e); // reuse existing restart logic
+        }
+
         #region Override Methods
 
         protected override void OnPaint(PaintEventArgs e)
