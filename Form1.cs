@@ -17,10 +17,12 @@ namespace TetrisGame
         private System.Windows.Forms.Timer gameTimer = new System.Windows.Forms.Timer();
         private System.Windows.Forms.Timer flashTimer = new System.Windows.Forms.Timer();
         private System.Windows.Forms.Timer settingsAnimationTimer = new System.Windows.Forms.Timer();
+        private System.Windows.Forms.Timer scoreBlinkTimer = new System.Windows.Forms.Timer();
 
         private int score = 0;
         private int highScore = 0;
         private int flashCounter = 0;
+        private int blinkCount = 0;
         private int settingsTargetHeight = 40;
         private bool isGameOver = false;
         private bool isPaused = false;
@@ -29,6 +31,7 @@ namespace TetrisGame
         private bool isSettingsExpanding = false;
         private bool isSettingsPanelOpen = false;
         private List<int> flashingRows = new List<int>();
+        private Label blinkingLabel = null;
 
         private List<Shape> shapes;
         private Shape currentShape;
@@ -64,6 +67,9 @@ namespace TetrisGame
 
             settingsAnimationTimer.Interval = 15;
             settingsAnimationTimer.Tick += AnimateSettingsPanel;
+
+            scoreBlinkTimer.Interval = 150;
+            scoreBlinkTimer.Tick += ScoreBlinkTick;
 
             gameTimer.Interval = 500;
             gameTimer.Tick += GameTick;
@@ -144,18 +150,38 @@ namespace TetrisGame
                 }
 
                 score += flashingRows.Count * 100 + (flashingRows.Count - 1) * 50;
+                lblScoreValue.Text = score.ToString();
+                TriggerBlink(lblScoreValue);
 
                 if (score > highScore)
                 {
                     highScore = score;
                     Properties.Settings.Default.HighScore = highScore;
                     Properties.Settings.Default.Save();
+
+                    lblHighScoreValue.Text = highScore.ToString();
+                    TriggerBlink(lblHighScoreValue);
                 }
 
                 flashingRows.Clear();
             }
 
             Invalidate();
+        }
+
+        private void ScoreBlinkTick(object sender, EventArgs e)
+        {
+            if (blinkingLabel == null) return;
+
+            blinkCount++;
+            blinkingLabel.ForeColor = (blinkCount % 2 == 0) ? Color.Gold : Color.BlanchedAlmond;
+
+            if (blinkCount >= 6)
+            {
+                scoreBlinkTimer.Stop();
+                blinkingLabel.ForeColor = Color.Black;
+                blinkingLabel = null;
+            }
         }
 
         #endregion
@@ -186,8 +212,8 @@ namespace TetrisGame
             {
                 isPaused = true;
                 gameTimer.Stop();
-                lblScore.Text = $"Score: Paused";
-                lblHighScore.Text = $"High Score: {highScore}";
+                lblScoreValue.Text = $"Paused";
+                lblHighScoreValue.Text = highScore.ToString();
 
                 iconPause.Visible = false;
                 iconResume.Visible = true;
@@ -202,8 +228,8 @@ namespace TetrisGame
             {
                 isPaused = false;
                 gameTimer.Start();
-                lblScore.Text = $"Score: {score}";
-                lblHighScore.Text = $"High Score: {highScore}";
+                lblScoreValue.Text = score.ToString();
+                lblHighScoreValue.Text = highScore.ToString();
 
                 iconPause.Visible = true;
                 iconResume.Visible = false;
@@ -217,8 +243,8 @@ namespace TetrisGame
             grid = new int[GridHeight, GridWidth];
             currentShape = null;
             score = 0;
-            lblScore.Text = $"Score: {score}";
-            lblHighScore.Text = $"High Score: {highScore}";
+            lblScoreValue.Text = score.ToString();
+            lblHighScoreValue.Text = highScore.ToString();
             isGameOver = false;
 
             // NEW: Clear pause state
@@ -356,6 +382,13 @@ namespace TetrisGame
             }
         }
 
+        private void TriggerBlink(Label label)
+        {
+            blinkingLabel = label;
+            blinkCount = 0;
+            scoreBlinkTimer.Start();
+        }
+
         private void AnimateSettingsPanel(object sender, EventArgs e)
         {
             int step = 5;
@@ -474,8 +507,8 @@ namespace TetrisGame
             }
 
             // Draw score labels
-            lblScore.Text = $"Score: {score}";
-            lblHighScore.Text = $"High Score: {highScore}";
+            lblScoreValue.Text = score.ToString();
+            lblHighScoreValue.Text = highScore.ToString();
 
             // Draw next piece preview
             if (nextShape != null)
@@ -575,16 +608,16 @@ namespace TetrisGame
                     if (isPaused)
                     {
                         gameTimer.Stop();
-                        lblScore.Text = $"Score: Paused";
-                        lblHighScore.Text = $"High Score: {highScore}";
+                        lblScoreValue.Text = $"Paused";
+                        lblHighScoreValue.Text = highScore.ToString();
                         iconPause.Visible = false;
                         iconResume.Visible = true;
                     }
                     else
                     {
                         gameTimer.Start();
-                        lblScore.Text = $"Score: {score}";
-                        lblHighScore.Text = $"High Score: {highScore}";
+                        lblScoreValue.Text = score.ToString();
+                        lblHighScoreValue.Text = highScore.ToString();
                         iconPause.Visible = true;
                         iconResume.Visible = false;
                     }

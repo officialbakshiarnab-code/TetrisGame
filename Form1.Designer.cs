@@ -6,8 +6,10 @@
 
         private System.ComponentModel.IContainer components = null;
         private System.Windows.Forms.Panel bottomPanel;
-        private System.Windows.Forms.Label lblScore;
-        private System.Windows.Forms.Label lblHighScore;
+        private System.Windows.Forms.Label lblScoreText;
+        private System.Windows.Forms.Label lblScoreValue;
+        private System.Windows.Forms.Label lblHighScoreText;
+        private System.Windows.Forms.Label lblHighScoreValue;
         private System.Windows.Forms.Panel topPanel;
         private System.Windows.Forms.PictureBox iconRestart;
         private System.Windows.Forms.PictureBox iconPause;
@@ -38,8 +40,10 @@
         {
             components = new System.ComponentModel.Container();
             bottomPanel = new Panel();
-            lblScore = new Label();
-            lblHighScore = new Label();
+            lblScoreText = new Label();
+            lblScoreValue = new Label();
+            lblHighScoreText = new Label();
+            lblHighScoreValue = new Label();
             topPanel = new Panel();
             iconRestart = new PictureBox();
             iconPause = new PictureBox();
@@ -48,6 +52,8 @@
             settingsPanel = new FlowLayoutPanel();
             chkGhostPiece = new CheckBox();
             chkMirrorEffect = new CheckBox();
+
+            ToolTip tip = new ToolTip();
 
             bottomPanel.SuspendLayout();
             SuspendLayout();
@@ -130,30 +136,37 @@
             topPanel.Controls.Add(iconSettings);
             topPanel.Controls.Add(settingsPanel);
 
-            // ToolTips
-            ToolTip tip = new ToolTip();
-            tip.SetToolTip(iconRestart, "Restart");
-            tip.SetToolTip(iconPause, "Pause");
-            tip.SetToolTip(iconResume, "Resume");
-            tip.SetToolTip(iconSettings, "Settings");
+            // lblScoreText
+            lblScoreText.Text = "Score:";
+            lblScoreText.Font = new Font("Arial", 10, FontStyle.Bold);
+            lblScoreText.ForeColor = Color.DeepSkyBlue;
+            lblScoreText.Location = new Point(10, 18);
+            lblScoreText.Size = new Size(60, 22);
+            lblScoreText.TextAlign = ContentAlignment.MiddleLeft;
 
-            // lblScore
-            lblScore.Name = "lblScore";
-            lblScore.Location = new Point(10, 8);
-            lblScore.Size = new Size(200, 22);
-            lblScore.TabIndex = 1;
-            lblScore.Text = "Score: 0";
-            lblScore.Font = new Font("Arial", 12, FontStyle.Bold);
-            lblScore.ForeColor = Color.Black;
+            // lblScoreValue
+            lblScoreValue.Text = "0";
+            lblScoreValue.Font = new Font("Arial", 10, FontStyle.Bold);
+            lblScoreValue.ForeColor = Color.BlanchedAlmond;
+            lblScoreValue.Location = new Point(70, 18);
+            lblScoreValue.Size = new Size(50, 22);
+            lblScoreValue.TextAlign = ContentAlignment.MiddleLeft;
 
-            // lblHighScore
-            lblHighScore.Name = "lblHighScore";
-            lblHighScore.Location = new Point(10, 32);
-            lblHighScore.Size = new Size(200, 22);
-            lblHighScore.TabIndex = 2;
-            lblHighScore.Text = "High Score: 0";
-            lblHighScore.Font = new Font("Arial", 12, FontStyle.Bold);
-            lblHighScore.ForeColor = Color.Black;
+            // lblHighScoreText
+            lblHighScoreText.Text = "High Score:";
+            lblHighScoreText.Font = new Font("Arial", 10, FontStyle.Bold);
+            lblHighScoreText.ForeColor = Color.DeepSkyBlue;
+            lblHighScoreText.Location = new Point(160, 18);
+            lblHighScoreText.Size = new Size(90, 22);
+            lblHighScoreText.TextAlign = ContentAlignment.MiddleRight;
+
+            // lblHighScoreValue
+            lblHighScoreValue.Text = "0";
+            lblHighScoreValue.Font = new Font("Arial", 10, FontStyle.Bold);
+            lblHighScoreValue.ForeColor = Color.BlanchedAlmond;
+            lblHighScoreValue.Location = new Point(255, 18);
+            lblHighScoreValue.Size = new Size(60, 22);
+            lblHighScoreValue.TextAlign = ContentAlignment.MiddleRight;
 
             // bottomPanel
             bottomPanel.Name = "bottomPanel";
@@ -162,8 +175,10 @@
             bottomPanel.TabIndex = 0;
             bottomPanel.BorderStyle = BorderStyle.FixedSingle;
             bottomPanel.BackColor = Color.LightGray;
-            bottomPanel.Controls.Add(lblScore);
-            bottomPanel.Controls.Add(lblHighScore);
+            bottomPanel.Controls.Add(lblScoreText);
+            bottomPanel.Controls.Add(lblScoreValue);
+            bottomPanel.Controls.Add(lblHighScoreText);
+            bottomPanel.Controls.Add(lblHighScoreValue);
 
             // Form1
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -176,6 +191,12 @@
             Name = "Form1";
             Text = "Tetris Game";
             Load += Form1_Load;
+
+            // ToolTips
+            tip.SetToolTip(iconRestart, "Restart");
+            tip.SetToolTip(iconPause, "Pause");
+            tip.SetToolTip(iconResume, "Resume");
+            tip.SetToolTip(iconSettings, "Settings");
 
             bottomPanel.ResumeLayout(false);
             ResumeLayout(false);
