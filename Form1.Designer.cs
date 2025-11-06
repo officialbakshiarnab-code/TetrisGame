@@ -138,33 +138,33 @@
 
             // lblScoreText
             lblScoreText.Text = "Score:";
-            lblScoreText.Font = new Font("Arial", 10, FontStyle.Bold);
+            lblScoreText.Font = new Font("Arial", 11, FontStyle.Bold);
             lblScoreText.ForeColor = Color.DeepSkyBlue;
             lblScoreText.Location = new Point(10, 18);
-            lblScoreText.Size = new Size(60, 22);
+            lblScoreText.Size = new Size(75, 22);
             lblScoreText.TextAlign = ContentAlignment.MiddleLeft;
 
             // lblScoreValue
             lblScoreValue.Text = "0";
             lblScoreValue.Font = new Font("Arial", 10, FontStyle.Bold);
-            lblScoreValue.ForeColor = Color.BlanchedAlmond;
-            lblScoreValue.Location = new Point(70, 18);
+            lblScoreValue.ForeColor = Color.LightSkyBlue;
+            lblScoreValue.Location = new Point(80, 18);
             lblScoreValue.Size = new Size(50, 22);
             lblScoreValue.TextAlign = ContentAlignment.MiddleLeft;
 
             // lblHighScoreText
-            lblHighScoreText.Text = "High Score:";
-            lblHighScoreText.Font = new Font("Arial", 10, FontStyle.Bold);
+            lblHighScoreText.Text = "🏆High Score:";
+            lblHighScoreText.Font = new Font("Arial", 11, FontStyle.Bold);
             lblHighScoreText.ForeColor = Color.DeepSkyBlue;
             lblHighScoreText.Location = new Point(160, 18);
-            lblHighScoreText.Size = new Size(90, 22);
+            lblHighScoreText.Size = new Size(155, 22);
             lblHighScoreText.TextAlign = ContentAlignment.MiddleRight;
 
             // lblHighScoreValue
             lblHighScoreValue.Text = "0";
             lblHighScoreValue.Font = new Font("Arial", 10, FontStyle.Bold);
-            lblHighScoreValue.ForeColor = Color.BlanchedAlmond;
-            lblHighScoreValue.Location = new Point(255, 18);
+            lblHighScoreValue.ForeColor = Color.LightSkyBlue;
+            lblHighScoreValue.Location = new Point(300, 18);
             lblHighScoreValue.Size = new Size(60, 22);
             lblHighScoreValue.TextAlign = ContentAlignment.MiddleRight;
 

@@ -174,12 +174,12 @@ namespace TetrisGame
             if (blinkingLabel == null) return;
 
             blinkCount++;
-            blinkingLabel.ForeColor = (blinkCount % 2 == 0) ? Color.Gold : Color.BlanchedAlmond;
+            blinkingLabel.ForeColor = (blinkCount % 2 == 0) ? Color.SkyBlue : Color.LightSkyBlue;
 
             if (blinkCount >= 6)
             {
                 scoreBlinkTimer.Stop();
-                blinkingLabel.ForeColor = Color.Black;
+                blinkingLabel.ForeColor = Color.LightSkyBlue;
                 blinkingLabel = null;
             }
         }
